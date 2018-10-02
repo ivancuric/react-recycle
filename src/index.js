@@ -84,7 +84,9 @@ class Scroller extends Component {
             })}
           </div>
         </div>
-        <a href="https://react-recycle.now.sh/">https://react-recycle.now.sh/</a>
+        <a href="https://github.com/ivancuric/react-recycle">
+          https://github.com/ivancuric/react-recycle
+        </a>
       </div>
     );
   }
