@@ -13,7 +13,7 @@ class Scroller extends Component {
   }
 
   static get BUFFER() {
-    return Scroller.ITEM_HEIGHT * 2;
+    return Scroller.ITEM_HEIGHT * 5;
   }
 
   constructor() {
