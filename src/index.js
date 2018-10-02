@@ -62,26 +62,29 @@ class Scroller extends Component {
 
   render() {
     return (
-      <div className="container" ref={this.scrollContainer}>
-        <div
-          className="itemWrapper"
-          style={{ height: Scroller.ITEM_HEIGHT * this.items.length }}
-        >
-          {this.items.map((item, index) => {
-            if (this.isInView(index)) {
-              return (
-                <div
-                  className={index % 2 ? 'item odd' : 'item even'}
-                  key={index}
-                  style={{ top: Scroller.ITEM_HEIGHT * index }}
-                >
-                  List Item {index + 1}
-                </div>
-              );
-            }
-            return null;
-          })}
+      <div>
+        <div className="container" ref={this.scrollContainer}>
+          <div
+            className="itemWrapper"
+            style={{ height: Scroller.ITEM_HEIGHT * this.items.length }}
+          >
+            {this.items.map((item, index) => {
+              if (this.isInView(index)) {
+                return (
+                  <div
+                    className={index % 2 ? 'item odd' : 'item even'}
+                    key={index}
+                    style={{ top: Scroller.ITEM_HEIGHT * index }}
+                  >
+                    List Item {index + 1}
+                  </div>
+                );
+              }
+              return null;
+            })}
+          </div>
         </div>
+        <a href="https://react-recycle.now.sh/">https://react-recycle.now.sh/</a>
       </div>
     );
   }
