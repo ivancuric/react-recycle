@@ -1,12 +1,12 @@
 {
-  "name": "node-recycling-without-event-listeners-w-state",
-  "version": "1.0.0",
+  "name": "react-recycle",
+  "version": "1.0.5",
   "description": "",
   "keywords": [],
   "main": "src/index.js",
   "dependencies": {
-    "react": "16.4.2",
-    "react-dom": "16.4.2",
+    "react": "16.5.2",
+    "react-dom": "16.5.2",
     "react-scripts": "1.1.4",
     "serve": "^10.0.2"
   },

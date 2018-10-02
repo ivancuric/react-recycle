@@ -57,7 +57,6 @@ class Scroller extends Component {
   }
 
   componentDidMount() {
-    this.setScrollPosition();
     this.rafLoop();
   }
 
