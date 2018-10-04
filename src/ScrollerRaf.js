@@ -1,19 +1,13 @@
 import React, { PureComponent } from 'react';
-import { ListItem } from './ListItem';
+// import { ListItem } from './ListItem';
+
+const ITEM_HEIGHT = 48;
+const WINDOW_HEIGHT = 400;
+const BUFFER = ITEM_HEIGHT;
+const ITEMS_RENDERED = Math.ceil(WINDOW_HEIGHT / ITEM_HEIGHT);
+const CONTAINER_HEIGHT = ITEMS_RENDERED * ITEM_HEIGHT + BUFFER;
 
 export class ScrollerRaf extends PureComponent {
-  static get ITEM_HEIGHT() {
-    return 48;
-  }
-
-  static get CONTAINER_HEIGHT() {
-    return 400;
-  }
-
-  static get BUFFER() {
-    return ScrollerRaf.ITEM_HEIGHT;
-  }
-
   constructor() {
     super();
     this.scrollContainer = React.createRef();
@@ -22,39 +16,84 @@ export class ScrollerRaf extends PureComponent {
     this.onButtonClick = this.onButtonClick.bind(this);
     this.setScrollPosition = this.setScrollPosition.bind(this);
 
-    this.items = new Array(10000).fill(true);
+    this.items = new Array(100).fill(true).map((_, i) => `Item ${i}`);
 
     this.state = {
-      scrollTop: 0
+      scrollTop: 0,
+      firstVisibleIndex: 0,
+      indexesToRender: []
     };
   }
 
   isInView(index) {
     if (
-      (index + 1) * ScrollerRaf.ITEM_HEIGHT >
-        this.state.scrollTop - ScrollerRaf.BUFFER &&
-      (index + 1) * ScrollerRaf.ITEM_HEIGHT <
-        this.state.scrollTop + ScrollerRaf.CONTAINER_HEIGHT + ScrollerRaf.BUFFER
+      (index + 1) * ITEM_HEIGHT > this.state.scrollTop - BUFFER &&
+      (index + 1) * ITEM_HEIGHT < this.state.scrollTop + WINDOW_HEIGHT + BUFFER
     ) {
       return true;
     }
+  }
+
+  prerenderCalc(scrollTop) {
+    let flagged = false;
+    let firstVisibleIndex = 0;
+
+    const indexesToRender = this.items
+      .map((_, index) => {
+        if (this.isInView(index)) {
+          if (!flagged) {
+            flagged = true;
+            firstVisibleIndex = index;
+          }
+          return index;
+        }
+        return null;
+      })
+      .filter(Boolean);
+
+    this.setState(
+      {
+        firstVisibleIndex,
+        indexesToRender,
+        scrollTop
+      }
+      // console.log(this.state)
+    );
   }
 
   setScrollPosition() {
     const scrollTop = this.scrollContainer.current.scrollTop;
 
     if (scrollTop !== this.state.scrollTop) {
-      this.setState(() => ({
-        scrollTop: scrollTop
-      }));
+      this.prerenderCalc(scrollTop);
     }
   }
 
   onButtonClick() {
     this.scrollContainer.current.scrollTo({
-      top: ScrollerRaf.ITEM_HEIGHT * this.items.length - 400,
+      top: ITEM_HEIGHT * this.items.length - 400,
       behavior: 'smooth'
     });
+  }
+
+  renderItems() {
+    const array = [];
+
+    for (
+      let i = this.state.firstVisibleIndex;
+      i <= this.state.indexesToRender.length;
+      i++
+    ) {
+      array.push(this.items[i]);
+    }
+
+    // console.log(array)
+
+    console.log(
+      this.state.firstVisibleIndex,
+      this.state.indexesToRender.length
+      // this.items[this.state.firstVisibleIndex]
+    );
   }
 
   rafLoop() {
@@ -69,23 +108,21 @@ export class ScrollerRaf extends PureComponent {
   render() {
     return (
       <div>
-        <div className="container" ref={this.scrollContainer}>
+        <div className="itemWindow" ref={this.scrollContainer}>
           <div
             className="itemWrapper"
-            style={{ height: ScrollerRaf.ITEM_HEIGHT * this.items.length }}
+            style={{ height: ITEM_HEIGHT * this.items.length }}
           >
-            {this.items.map((_, index) => {
-              if (this.isInView(index)) {
-                return (
-                  <ListItem
-                    key={index}
-                    index={index}
-                    height={ScrollerRaf.ITEM_HEIGHT}
-                  />
-                );
-              }
-              return null;
-            })}
+            <div
+              className="visibleItems"
+              style={{
+                height: CONTAINER_HEIGHT,
+                transform: `translateY(${this.state.firstVisibleIndex *
+                  ITEM_HEIGHT}px)`
+              }}
+            >
+              {this.renderItems()}
+            </div>
           </div>
         </div>
         <a href="https://github.com/ivancuric/react-recycle">
