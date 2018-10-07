@@ -11,7 +11,7 @@ body {
   contain: content;
 }
 
-.itemWindow {
+.scroll-window {
   height: 400px;
   width: 400px;
   overflow-y: scroll;
@@ -20,7 +20,7 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-.itemWrapper {
+.scroll-track {
   position: relative;
   will-change: transform;
   contain: strict;
