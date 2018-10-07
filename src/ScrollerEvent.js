@@ -12,6 +12,7 @@ export class ScrollerEvent extends PureComponent {
     this.scrollContainer = React.createRef();
     this.isInView = this.isInView.bind(this);
     this.onScroll = this.onScroll.bind(this);
+    // this.rafLoop = this.rafLoop.bind(this);
     this.onButtonClick = this.onButtonClick.bind(this);
     this.setScrollPosition = this.setScrollPosition.bind(this);
 
@@ -35,6 +36,7 @@ export class ScrollerEvent extends PureComponent {
   componentDidMount() {
     this.setScrollPosition();
     this.prerenderItems();
+    // this.rafLoop();
   }
 
   onScroll() {
@@ -52,6 +54,11 @@ export class ScrollerEvent extends PureComponent {
       renderedItems
     });
   }
+
+  // rafLoop() {
+  //   this.setScrollPosition();
+  //   return requestAnimationFrame(this.rafLoop);
+  // }
 
   smartRender() {
     const itemsToRender = [];
