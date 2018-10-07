@@ -1,6 +1,10 @@
 import React, { PureComponent } from 'react';
 
 export class ListItem extends PureComponent {
+  constructor() {
+    super();
+    this.state = {};
+  }
   render() {
     return (
       <div
@@ -8,7 +12,7 @@ export class ListItem extends PureComponent {
         // style={{
         //   transform: `translateY(${this.props.height * this.props.index}px)`
         // }}
-        // style={{ top: this.props.height * this.props.index }}
+        style={{ top: this.props.height * this.props.index }}
       >
         <span>List</span> <span>Item</span> <span>{this.props.index + 1}</span>
       </div>

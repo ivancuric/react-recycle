@@ -1,10 +1,10 @@
 import React, { PureComponent } from 'react';
-// import { ListItem } from './ListItem';
+import { ListItem } from './ListItem';
 
 const ITEM_HEIGHT = 48;
 const WINDOW_HEIGHT = 400;
 const BUFFER = ITEM_HEIGHT;
-// const ITEMS_IN_WINDOW = Math.ceil(WINDOW_HEIGHT / ITEM_HEIGHT);
+const ITEMS_IN_WINDOW = Math.ceil(WINDOW_HEIGHT / ITEM_HEIGHT);
 // const CONTAINER_HEIGHT = ITEMS_IN_WINDOW * ITEM_HEIGHT + BUFFER;
 
 export class ScrollerRaf extends PureComponent {
@@ -12,54 +12,62 @@ export class ScrollerRaf extends PureComponent {
     super();
 
     this.scrollContainer = React.createRef();
-    this.isInView = this.isInView.bind(this);
+    // this.isInView = this.isInView.bind(this);
     this.rafLoop = this.rafLoop.bind(this);
     this.onButtonClick = this.onButtonClick.bind(this);
-    this.setScrollPosition = this.setScrollPosition.bind(this);
+    this.getScrollPosition = this.getScrollPosition.bind(this);
 
     this.items = new Array(100).fill(true).map((_, i) => `Item ${i}`);
 
     this.state = {
       scrollTop: undefined,
-      firstVisibleIndex: 0,
+      firstVisibleIndex: undefined,
+      prerenderedItems: [],
       indexesToRender: []
     };
   }
 
-  isInView(index) {
-    if (
-      (index + 1) * ITEM_HEIGHT > this.state.scrollTop - BUFFER &&
-      (index + 1) * ITEM_HEIGHT < this.state.scrollTop + WINDOW_HEIGHT + BUFFER
+  // isInView(index) {
+  //   if (
+  //     (index + 1) * ITEM_HEIGHT > this.state.scrollTop - BUFFER &&
+  //     (index + 1) * ITEM_HEIGHT < this.state.scrollTop + WINDOW_HEIGHT + BUFFER
+  //   ) {
+  //     return true;
+  //   }
+  // }
+
+  getIndexesToRender() {
+    const indexesToRender = [];
+
+    for (
+      let i = this.state.firstVisibleIndex;
+      i <= this.state.firstVisibleIndex + ITEMS_IN_WINDOW;
+      i++
     ) {
-      return true;
+      indexesToRender.push(i);
     }
-  }
-
-  getFirstVisibleIndex() {
-    return Math.ceil(this.state.scrollTop / ITEM_HEIGHT);
-  }
-
-  prerenderCalc(scrollTop) {
-    // const indexesToRender = [];
-
-    // for (let i = this.state.firstVisibleIndex; i < ITEMS_IN_WINDOW; i++) {
-    //   if (this.isInView(i)) {
-    //     indexesToRender.push(i);
-    //   }
-    // }
 
     this.setState(() => ({
-      firstVisibleIndex: this.getFirstVisibleIndex(),
-      // indexesToRender,
-      scrollTop
+      indexesToRender
     }));
   }
 
-  setScrollPosition() {
+  getFirstVisibleIndex() {
+    const firstVisibleIndex = Math.floor(this.state.scrollTop / ITEM_HEIGHT);
+
+    this.setState(
+      () => ({
+        firstVisibleIndex
+      }),
+      this.getIndexesToRender
+    );
+  }
+
+  getScrollPosition() {
     const scrollTop = this.scrollContainer.current.scrollTop;
 
     if (scrollTop !== this.state.scrollTop) {
-      this.prerenderCalc(scrollTop);
+      this.setState(() => ({ scrollTop }), this.getFirstVisibleIndex);
     }
   }
 
@@ -70,39 +78,42 @@ export class ScrollerRaf extends PureComponent {
     });
   }
 
-  renderItems() {
-    const array = [];
+  prerenderItems() {
+    const prerenderedItems = this.items.map((item, i) => (
+      <ListItem key={i} index={i} />
+    ));
 
-    for (
-      let i = this.state.firstVisibleIndex;
-      i <= this.state.indexesToRender.length;
-      i++
-    ) {
-      array.push(this.items[i]);
+    this.setState({
+      prerenderedItems
+    });
+  }
+
+  renderItems() {
+    if (this.state.indexesToRender.length === 0) {
+      return;
     }
 
-    // console.log(array)
+    const renderedItems = this.state.indexesToRender.map(
+      index => this.state.prerenderedItems[index]
+    );
 
-    // console.log(
-    //   this.state.firstVisibleIndex,
-    //   this.state.indexesToRender.length
-    // this.items[this.state.firstVisibleIndex]
-    // );
+    // console.log(renderedItems);
+
+    return renderedItems;
+  }
+
+  componentDidUpdate() {
+    // console.log(this.state);
   }
 
   rafLoop() {
-    this.setScrollPosition();
+    this.getScrollPosition();
     return requestAnimationFrame(this.rafLoop);
   }
 
   componentDidMount() {
+    this.prerenderItems();
     this.rafLoop();
-  }
-
-  componentDidUpdate(_, prevState) {
-    if (this.state.firstVisibleIndex !== prevState.firstVisibleIndex) {
-      // console.log(this.state.firstVisibleIndex);
-    }
   }
 
   render() {
@@ -121,7 +132,7 @@ export class ScrollerRaf extends PureComponent {
                   ITEM_HEIGHT}px)`
               }}
             > */}
-            {this.renderItems()}
+            {/* {this.renderItems()} */}
             {/* </div> */}
           </div>
         </div>
@@ -131,7 +142,10 @@ export class ScrollerRaf extends PureComponent {
         <div>
           <button onClick={this.onButtonClick}>Scroll</button>
         </div>
-        <div>{this.state.firstVisibleIndex}</div>
+        <div>
+          {`${this.state.firstVisibleIndex} — ${this.state.firstVisibleIndex +
+            ITEMS_IN_WINDOW}`}
+        </div>
       </div>
     );
   }

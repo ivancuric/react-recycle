@@ -2,6 +2,6 @@ import './styles.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { ScrollerRaf } from './ScrollerRaf';
+import { ScrollerEvent } from './ScrollerEvent';
 
-ReactDOM.render(<ScrollerRaf />, document.getElementById('root'));
+ReactDOM.render(<ScrollerEvent />, document.getElementById('root'));

@@ -1,19 +1,12 @@
 import React, { PureComponent } from 'react';
 import { ListItem } from './ListItem';
 
+const ITEM_HEIGHT = 48;
+const CONTAINER_HEIGHT = 400;
+const BUFFER = ITEM_HEIGHT;
+const ITEMS_IN_WINDOW = Math.ceil(CONTAINER_HEIGHT / ITEM_HEIGHT);
+
 export class ScrollerEvent extends PureComponent {
-  static get ITEM_HEIGHT() {
-    return 48;
-  }
-
-  static get CONTAINER_HEIGHT() {
-    return 400;
-  }
-
-  static get BUFFER() {
-    return ScrollerEvent.ITEM_HEIGHT;
-  }
-
   constructor() {
     super();
     this.scrollContainer = React.createRef();
@@ -25,32 +18,72 @@ export class ScrollerEvent extends PureComponent {
     this.items = new Array(10000).fill(true);
 
     this.state = {
-      scrollTop: 0
+      scrollTop: undefined
     };
   }
 
   isInView(index) {
     if (
-      (index + 1) * ScrollerEvent.ITEM_HEIGHT >
-        this.state.scrollTop - ScrollerEvent.BUFFER &&
-      (index + 1) * ScrollerEvent.ITEM_HEIGHT <
-        this.state.scrollTop +
-          ScrollerEvent.CONTAINER_HEIGHT +
-          ScrollerEvent.BUFFER
+      (index + 1) * ITEM_HEIGHT > this.state.scrollTop - BUFFER &&
+      (index + 1) * ITEM_HEIGHT <
+        this.state.scrollTop + CONTAINER_HEIGHT + BUFFER
     ) {
       return true;
     }
   }
 
-  onScroll(event) {
+  componentDidMount() {
+    this.setScrollPosition();
+    this.prerenderItems();
+  }
+
+  onScroll() {
     requestAnimationFrame(() => {
       this.setScrollPosition();
     });
   }
 
+  prerenderItems() {
+    const renderedItems = this.items.map((_, index) => (
+      <ListItem key={index} index={index} height={ITEM_HEIGHT} />
+    ));
+
+    this.setState({
+      renderedItems
+    });
+  }
+
+  smartRender() {
+    const itemsToRender = [];
+    const firstVisibleIndex = Math.floor(this.state.scrollTop / ITEM_HEIGHT);
+
+    if (this.state.scrollTop === undefined) {
+      return null;
+    }
+
+    for (
+      let i = firstVisibleIndex;
+      i < firstVisibleIndex + ITEMS_IN_WINDOW;
+      i++
+    ) {
+      itemsToRender.push(this.state.renderedItems[i]);
+    }
+
+    return itemsToRender;
+  }
+
+  dumbRender() {
+    return this.items.map((_, index) => {
+      if (this.isInView(index)) {
+        return <ListItem key={index} index={index} height={ITEM_HEIGHT} />;
+      }
+      return null;
+    });
+  }
+
   onButtonClick() {
     this.scrollContainer.current.scrollTo({
-      top: ScrollerEvent.ITEM_HEIGHT * this.items.length - 400,
+      top: ITEM_HEIGHT * this.items.length - 400,
       behavior: 'smooth'
     });
   }
@@ -59,9 +92,9 @@ export class ScrollerEvent extends PureComponent {
     const scrollTop = this.scrollContainer.current.scrollTop;
 
     if (scrollTop !== this.state.scrollTop) {
-      this.setState(() => ({
-        scrollTop: scrollTop
-      }));
+      this.setState({
+        scrollTop
+      });
     }
   }
 
@@ -69,26 +102,15 @@ export class ScrollerEvent extends PureComponent {
     return (
       <div>
         <div
-          className="container"
+          className="scroll-window"
           ref={this.scrollContainer}
           onScroll={this.onScroll}
         >
           <div
-            className="itemWrapper"
-            style={{ height: ScrollerEvent.ITEM_HEIGHT * this.items.length }}
+            className="scroll-track"
+            style={{ height: ITEM_HEIGHT * this.items.length }}
           >
-            {this.items.map((_, index) => {
-              if (this.isInView(index)) {
-                return (
-                  <ListItem
-                    key={index}
-                    index={index}
-                    height={ScrollerEvent.ITEM_HEIGHT}
-                  />
-                );
-              }
-              return null;
-            })}
+            {this.smartRender()}
           </div>
         </div>
         <a href="https://github.com/ivancuric/react-recycle">
