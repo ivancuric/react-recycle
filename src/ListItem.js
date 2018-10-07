@@ -1,20 +1,16 @@
 import React, { PureComponent } from 'react';
 
 export class ListItem extends PureComponent {
-  constructor() {
-    super();
-    this.state = {};
-  }
   render() {
     return (
       <div
         className={this.props.index % 2 ? 'item odd' : 'item even'}
-        // style={{
-        //   transform: `translateY(${this.props.height * this.props.index}px)`
-        // }}
-        style={{ top: this.props.height * this.props.index }}
+        style={{
+          transform: `translateY(${this.props.height * this.props.index}px)`
+        }}
+        // style={{ top: this.props.height * this.props.index }}
       >
-        <span>List</span> <span>Item</span> <span>{this.props.index + 1}</span>
+        List Item {this.props.index + 1}
       </div>
     );
   }
